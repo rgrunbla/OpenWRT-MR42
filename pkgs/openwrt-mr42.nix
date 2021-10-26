@@ -1,17 +1,26 @@
 { stdenv
 , lib
 , fetchFromGitHub
-, cacert
-, envsubst
-, file
 , git
-, gcc
-, gnumake
-, ncurses
 , perl
-, pkg-config
+, gnumake
+, gcc
 , unzip
+, utillinux
+, python3
+, rsync
+, patch
+, wget
+, file
+, subversion
 , which
+, pkgconfig
+, openssl
+, systemd
+, binutils
+, ncurses
+, zlib
+, glibc
 }:
 
 stdenv.mkDerivation {
@@ -23,23 +32,32 @@ stdenv.mkDerivation {
     repo = "openwrt";
     sha256 = "sha256-aIl/jeVL1r+73U1z67MINDMc15rDycj5KeUqEFzOzQo=";
   };
+
   buildInputs = [
-    cacert
-    envsubst
-    file
     git
-    gcc
-    gnumake
-    ncurses
     perl
-    pkg-config
+    gnumake
+    gcc
     unzip
+    utillinux
+    python3
+    rsync
+    patch
+    wget
+    file
+    subversion
     which
+    pkgconfig
+    openssl
+    systemd
+    binutils
+    ncurses
+    zlib
+    zlib.static
+    glibc.static
   ];
 
-
   hardeningDisable = [ "format" ];
-
 
   meta = with lib; {
     homepage = "";
