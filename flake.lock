@@ -1,0 +1,62 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1635070614,
+        "narHash": "sha256-eRup9WsvSIhsRrSlNugPcQ7gfGOsbk3d4izufwVlz1Q=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "3b1789322fcbcb5cf51228d732752714f1bf77da",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-21.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1634661806,
+        "narHash": "sha256-fBuR7EZ67UOdNt3gEwhoyWJ6zJtXh4kuupIALRcx/7I=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "8fe3b97ef4527ac88d03ea33e0789f3512e01adc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-21.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "rgrunbla-pkgs": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1634741945,
+        "narHash": "sha256-MBjHXl+Ll3yiTskmrxk1a9BRiiR0mqiYF0pnd8yO08U=",
+        "owner": "rgrunbla",
+        "repo": "Flakes",
+        "rev": "c3710de959496113bd23d724a98314f7ba2136cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rgrunbla",
+        "repo": "Flakes",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "rgrunbla-pkgs": "rgrunbla-pkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
