@@ -15,29 +15,39 @@
 , subversion
 , which
 , pkgconfig
-, openssl
 , systemd
 , binutils
 , ncurses
 , zlib
-, glibc
+, coreutils
+, curl
+, cacert
+, re2c
+, help2man
+, ninja
+, cmake
+, bison
 }:
 
 stdenv.mkDerivation {
   name = "OpenWRT-MR42";
 
   src = fetchFromGitHub {
-    rev = "master";
-    owner = "openwrt";
+    rev = "cryptid";
+    owner = "clayface";
     repo = "openwrt";
-    sha256 = "sha256-aIl/jeVL1r+73U1z67MINDMc15rDycj5KeUqEFzOzQo=";
+    sha256 = "sha256-2O9gJJev4c78MYgOuSzmH7YlMMJOUbmNSDjlyPar/iE=";
   };
+
+  outputHashAlgo = "sha256";
+  outputHashMode = "recursive";
+  outputHash = "";
+  CXXFLAGS = "-std=c++17";
 
   buildInputs = [
     git
     perl
     gnumake
-    gcc
     unzip
     utillinux
     python3
@@ -48,16 +58,34 @@ stdenv.mkDerivation {
     subversion
     which
     pkgconfig
-    openssl
     systemd
-    binutils
     ncurses
     zlib
     zlib.static
-    glibc.static
+    coreutils
+    curl
+    re2c
+    help2man
+    ninja
+    cmake
+    bison
   ];
 
-  hardeningDisable = [ "format" ];
+  GIT_SSL_CAINFO = "${cacert}/etc/ssl/certs/ca-bundle.crt";
+
+  patchPhase = ''
+    find ./ -type f -exec sed -i "s_/usr/bin/env_${coreutils}/bin/env_g" {} \;
+  '';
+
+  configurePhase = ''
+    cp ${./menuconfig} .config
+  '';
+
+  buildPhase = ''
+    make -j1 V=s
+  '';
+
+  hardeningDisable = [ "all" ];
 
   meta = with lib; {
     homepage = "";
