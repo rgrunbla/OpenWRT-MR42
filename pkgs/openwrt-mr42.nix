@@ -1,4 +1,5 @@
 { stdenv
+, buildFHSUserEnv
 , lib
 , fetchFromGitHub
 , git
@@ -15,23 +16,67 @@
 , subversion
 , which
 , pkgconfig
+, openssl
 , systemd
 , binutils
 , ncurses
 , zlib
-, coreutils
-, curl
+, glibc
+, clang
+, pkgs
 , cacert
-, re2c
-, help2man
-, ninja
-, cmake
-, bison
 }:
 
-stdenv.mkDerivation {
-  name = "OpenWRT-MR42";
+let
+  fixWrapper = pkgs.runCommand "fix-wrapper" { } ''
+    mkdir -p $out/bin
+    for i in ${pkgs.gcc.cc}/bin/*-gnu-gcc*; do
+      ln -s ${pkgs.gcc}/bin/gcc $out/bin/$(basename "$i")
+    done
+    for i in ${pkgs.gcc.cc}/bin/*-gnu-{g++,c++}*; do
+      ln -s ${pkgs.gcc}/bin/g++ $out/bin/$(basename "$i")
+    done
+  '';
+  fhs = buildFHSUserEnv {
+    name = "openwrt-env";
 
+    targetPkgs = _: [
+      git
+      perl
+      gnumake
+      gcc
+      unzip
+      utillinux
+      python3
+      rsync
+      patch
+      wget
+      file
+      subversion
+      which
+      pkgconfig
+      openssl
+      systemd
+      binutils
+      ncurses
+      zlib
+      zlib.static
+      glibc.static
+      fixWrapper
+    ];
+    multiPkgs = null;
+    extraOutputsToInstall = [ "dev" ];
+
+    profile = ''
+      export GIT_SSL_CAINFO="${cacert}/etc/ssl/certs/ca-bundle.crt";
+    '';
+  };
+
+in
+
+stdenv.mkDerivation {
+  pname = "OpenWRT-MR42";
+  version = "1";
   src = fetchFromGitHub {
     rev = "cryptid";
     owner = "clayface";
@@ -42,50 +87,21 @@ stdenv.mkDerivation {
   outputHashAlgo = "sha256";
   outputHashMode = "recursive";
   outputHash = "";
-  CXXFLAGS = "-std=c++17";
-
-  buildInputs = [
-    git
-    perl
-    gnumake
-    unzip
-    utillinux
-    python3
-    rsync
-    patch
-    wget
-    file
-    subversion
-    which
-    pkgconfig
-    systemd
-    ncurses
-    zlib
-    zlib.static
-    coreutils
-    curl
-    re2c
-    help2man
-    ninja
-    cmake
-    bison
-  ];
-
-  GIT_SSL_CAINFO = "${cacert}/etc/ssl/certs/ca-bundle.crt";
-
-  patchPhase = ''
-    find ./ -type f -exec sed -i "s_/usr/bin/env_${coreutils}/bin/env_g" {} \;
-  '';
 
   configurePhase = ''
     cp ${./menuconfig} .config
   '';
 
+hardeningDisable = [ "all" ];
+
   buildPhase = ''
-    make -j1 V=s
+    ${fhs}/bin/openwrt-env -c 'env'
+    ${fhs}/bin/openwrt-env -c 'make -j1 V=sc'
   '';
 
-  hardeningDisable = [ "all" ];
+  installPhase = ''
+
+  '';
 
   meta = with lib; {
     homepage = "";
