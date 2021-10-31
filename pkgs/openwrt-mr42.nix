@@ -25,6 +25,7 @@
 , clang
 , pkgs
 , cacert
+, curl
 }:
 
 let
@@ -43,6 +44,7 @@ let
     targetPkgs = _: [
       git
       perl
+      curl
       gnumake
       gcc
       unzip
@@ -72,30 +74,60 @@ let
     '';
   };
 
-in
-
-stdenv.mkDerivation {
-  pname = "OpenWRT-MR42";
+openwrt-mr42-sources = stdenv.mkDerivation {
+  pname = "OpenWRT-MR42-Source";
   version = "1";
   src = fetchFromGitHub {
     rev = "cryptid";
     owner = "clayface";
     repo = "openwrt";
-    sha256 = "sha256-2O9gJJev4c78MYgOuSzmH7YlMMJOUbmNSDjlyPar/iE=";
+    sha256 = "sha256-mxPWFDLAhBjr2Iq7XEUtF/k9mzoIRGNFi1QRXMuluC4=";
   };
 
   outputHashAlgo = "sha256";
   outputHashMode = "recursive";
-  outputHash = "";
+  outputHash = "sha256-e+uGgzgV/50O8H3HXsoEk2wRiw4EIDvCsGYiGfXMkM0=";
+
+  dontBuild = true;
 
   configurePhase = ''
     cp ${./menuconfig} .config
+    ${fhs}/bin/openwrt-env -c 'make download'
   '';
 
-hardeningDisable = [ "all" ];
+  installPhase = ''
+    rm ./tmp/.packageusergroup
+    rm ./tmp/.config-package.in
+    mkdir -p $out/src
+    cp -r * $out/src/
+  '';
+
+  meta = with lib; {
+    homepage = "";
+    description = "";
+    license = licenses.mit;
+    maintainers = with maintainers; [ rgrunbla ];
+  };
+};
+
+in
+
+stdenv.mkDerivation {
+  pname = "OpenWRT-MR42";
+  version = "1";
+  src = openwrt-mr42-sources.out;
+
+  configurePhase = ''
+    cp ${./menuconfig} .config
+    find ./ -iname "*util-linux-2.37*"
+  '';
+
+  hardeningDisable = [ "all" ];
+  GIT_SSL_CAINFO = "${cacert}/etc/ssl/certs/ca-bundle.crt";
 
   buildPhase = ''
     ${fhs}/bin/openwrt-env -c 'env'
+    ${fhs}/bin/openwrt-env -c 'make -j8 || true' || true
     ${fhs}/bin/openwrt-env -c 'make -j1 V=sc'
   '';
 
